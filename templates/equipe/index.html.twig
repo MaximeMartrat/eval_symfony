@@ -1,0 +1,28 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Equipes{% endblock %}
+ 
+{% block body %}
+    <div class="wrapper">
+        <h1>EQUIPES</h1><br>
+        <button id="btn_create">Créer nouvelle équipe</button>
+        <button id="btn_select">Selectionnner équipe</button>
+        <button id="btn_start" >Nouvelle saison</button>
+        <button id="btn_histo">Historique</button>
+    </div>
+    <script>
+        let createbtn = document.getElementById("btn_create");
+        let selectbtn = document.getElementById("btn_select");
+        let start = document.getElementById("btn_start");
+        let histo = document.getElementById("btn_histo");
+
+        createbtn.addEventListener("click", function(){
+            window.location.href = "createEquipe";
+        });
+        selectbtn.addEventListener("click", function(){
+            window.location.href = "/equipe";
+        });
+    </script>
+{% endblock %}
+
+

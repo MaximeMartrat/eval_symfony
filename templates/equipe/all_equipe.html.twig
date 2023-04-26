@@ -1,0 +1,49 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Equipes{% endblock %}
+ 
+{% block body %}
+    <style>
+        .wrapper {
+            margin: 1em auto;
+            width: 95%;
+        }
+        body{
+            text-align: center;
+            font-family: 'Poppins', sans-serif;
+        }
+        a{
+            text-decoration: none;
+        }
+    </style>
+    <div class="wrapper">
+        <h1>EQUIPES</h1><br>
+        <table class="table table-striped table-hover table-bordered">
+            <thead class="table-dark">
+            <tr>
+                <th scope="col">NOM</th>
+                <th scope="col">VILLE</th>
+                <th scope="col">BUGET</th>
+                <th scope="col">RENOMMEE</th>
+                <th>SELECT</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for equipe in equipes %}
+                <tr>
+                    <td>{{ equipe.nom|upper }}</td>
+                    <td>{{ equipe.ville|upper }}</td>
+                    <td>{{ equipe.budget|upper }}</td>
+                    <td>{{ equipe.renommee|upper }}</td>
+                    <td><button>OK</button></td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <script>
+        
+    </script>
+{% endblock %}
+
+

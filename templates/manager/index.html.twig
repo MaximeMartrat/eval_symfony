@@ -1,0 +1,51 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Manager{% endblock %}
+ 
+{% block body %}
+    <style>
+        .wrapper {
+            margin: 1em auto;
+            width: 95%;
+        }
+        body{
+            text-align: center;
+            font-family: 'Poppins', sans-serif;
+        }
+        a{
+            text-decoration: none;
+        }
+    </style>
+    <div class="wrapper">
+        <h1>MANAGERS</h1><br>
+        <table class="table table-striped table-hover table-bordered">
+            <thead class="table-dark">
+            <tr>
+                <th scope="col">NOM</th>
+                <th scope="col">PRENOM</th>
+                <th scope="col">ROLE</th>
+                <th scope="col">SALAIRE</th>
+                <th scope="col">SELECT</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for manager in managers %}
+                <tr>
+                    <td>{{ manager.nom|upper }}</td>
+                    <td>{{ manager.prenom|upper }}</td>
+                    <td>{{ manager.role|upper }}</td>
+                    <td>{{ manager.salaire|upper }}</td>
+                    {% if manager.getManagerEquipe() is null %}
+                    <td><button>OK</button></td>
+                    {% endif %}
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <script>
+        
+    </script>
+{% endblock %}
+
+

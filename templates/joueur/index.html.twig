@@ -1,0 +1,63 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Joueur{% endblock %}
+ 
+{% block body %}
+    <style>
+        .wrapper {
+            margin: 1em auto;
+            width: 95%;
+        }
+        body{
+            text-align: center;
+            font-family: 'Poppins', sans-serif;
+        }
+        a{
+            text-decoration: none;
+        }
+    </style>
+    <div class="wrapper">
+        <h1>JOUEURS</h1><br>
+        <table class="table table-striped table-hover table-bordered">
+            <thead class="table-dark">
+            <tr>
+                <th scope="col">NOM</th>
+                <th scope="col">PRENOM</th>
+                <th scope="col">POSITION</th>
+                <th scope="col">VITESSE</th>
+                <th scope="col">DRIBBLE</th>
+                <th scope="col">TIR</th>
+                <th scope="col">RENOMMEE</th>
+                <th scope="col">SALAIRE</th>
+                <th scope="col">ARRET</th>
+                <th scope="col">SELECT</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for joueur in joueurs %}
+                <tr>
+                    <td>{{ joueur.nom|upper }}</td>
+                    <td>{{ joueur.prenom|upper }}</td>
+                    <td>{{ joueur.position|upper }}</td>
+                    <td>{{ joueur.vitesse|upper }}</td>
+                    <td>{{ joueur.dribble|upper }}</td>
+                    <td>{{ joueur.tir|upper }}</td>
+                    <td>{{ joueur.renommee|upper }}</td>
+                    <td>{{ joueur.salaire|upper }}</td>
+                    <td>{{ joueur.arret|upper }}</td>
+                    {% if joueur.getJoueurEquipe() is null %}
+                        <td><button id="btn_joueur">OK</button></td>
+                    {% endif %}
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <script>
+        let joueur = document.getElementById("btn_joueur");
+        joueur.addEventListener("click", function(){
+            window.location.href = "/";
+        });
+    </script>
+{% endblock %}
+
