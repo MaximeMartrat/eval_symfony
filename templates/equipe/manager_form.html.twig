@@ -23,7 +23,7 @@
     </style>
     <div class="wrapper">
         <h1>MANAGERS</h1><br>
-        <form id="form1" method="POST">
+        <form id="formManager" action="/createEquipe/manager" method="POST">
         <h2 id="stafmanager" style="color:red">Il reste <span id="nbmanager">5</span> managers à recruter</h2>
         <table class="table table-striped table-hover table-bordered">
             <thead class="table-dark">
@@ -44,13 +44,13 @@
                         <td>{{ manager.prenom|upper }}</td>
                         <td>{{ manager.role|upper }}</td>
                         <td>{{ manager.salaire|upper }}</td>
-                        <td><input class="managercheck" type="checkbox" name="manager" value="{{ manager.id }}"></td>
+                        <td><input class="managercheck" type="checkbox" name="manager[]" value="{{ manager.id }}"></td>
                     {% endif %}
                 </tr>
             {% endfor %}
             </tbody>
         </table>
-        <button id='btn_managers' style='display:none'>Recruter Manager</button>
+        <button id='btn_managers' style='display:none' type="submit">Recruter Manager</button>
         </form>
     </div>
     <script>
@@ -58,7 +58,13 @@
         const nbmanager = document.getElementById("nbmanager");
         const stafmanager = document.getElementById("stafmanager");
         const btnmanagers = document.getElementById("btn_managers");
-        let maman = 2;
+        const formManager = document.getElementById("formManager");
+        formManager.addEventListener("submit", function(e) {
+        if(equipeManagers.length < 5) {
+            event.preventDefault();
+            alert('Votre équipe doit contenir au moins 5 managers.');
+        }
+    })
         //création de tableau vide pour ajouter les managers sélectionnés
         let equipeManagers = [];
         //boucle sur les checkbox pour vérifier celles checkés et ajouter dans le tableau correspondant l'id du manager attribuée comme valeur à l'input
@@ -78,7 +84,6 @@
                     stafmanager.style.color = 'limegreen';
                     btnmanagers.style.display = "block";
                     managers[i].style.display = "none";
-                    postmanager()
                 } else {
                     managers[i].style.display = "inline";
                     btnmanagers.style.display = "none";
@@ -86,7 +91,7 @@
                 }
             });
         };
-        function postmanager() {
+        {# function postmanager() {
             //requète ajax pour envoyer les données du tableau manager au controller 
             $.ajax({
                 type: 'POST',
@@ -102,6 +107,6 @@
                 }
             });
         }
-        btn_managers.addEventListener("click", postmanager());
+        btn_managers.addEventListener("click", postmanager()); #}
     </script>
 {% endblock %}

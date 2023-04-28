@@ -20,20 +20,25 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 class EquipeController extends AbstractController
 {
+    //route pour afficher l'acceuil
     #[Route('/symfoot', name: 'app_foot')]
     public function index(): Response
     {
         return $this->render('equipe/index.html.twig');
     }
 
+    //route pour effacer les sessions
     #[Route('/symfoot/deconnect', name: 'deconnect_foot')]
     public function deconnect(Request $request): Response
     {
         $session = $request->getSession();
         $session->remove('joueur');
+        $session->remove('manager');
+        $session->remove('equipe');
         return $this->render('equipe/index.html.twig');
     }
 
+    //route pour afficher l'acceuil de la création d'equipe
     #[Route('/equipeAccueil', name: 'acceuil_equipe')]
     public function equipeAccueil(Request $request): Response
     {
@@ -44,101 +49,125 @@ class EquipeController extends AbstractController
         ]);
     }
 
-    #[Route('/createEquipe', name: 'app_create')]
-    public function createEquipe(Request $request, EquipeRepository $equipeRepository, EntityManagerInterface $entityManager, SessionInterface $session):Response
+    //route pour créer une equipe
+    #[Route('/setEquipe', name: 'app_set')]
+    public function setEquipe(Request $request, EquipeRepository $equipeRepository, EntityManagerInterface $entityManager, SessionInterface $session):Response
     {
         // Vérifiez si une équipe est déjà enregistrée dans la session
         $session = $request->getSession();
-        $equipe = $session->get('equipe');
-        if (!$equipe) {
-            $equipe = new Equipe();
+        $myequipe = $session->get('equipe');
+        $equipeId = $myequipe->getId();
+        $equipe = $entityManager
+                ->getRepository(Equipe::class)
+                ->find($equipeId);    
+        if(count($equipe->getJoueurs()) > 15 && count($equipe->getManagers()) > 4) {
+            $equipe->setBudget();
+            $equipe->setRenommee();
+            $entityManager->persist($equipe);
+            $entityManager->flush();
+            // L'équipe est enregistrée avec succès, je la supprime de la session
+            $session->remove('equipe');
+            return $this->render('equipe/message.html.twig', [
+                'message' => 'equipe créée',
+            ]);
+        } else {
+            // L'équipe n'est pas encore complète, je l'enregistre dans la session
+            $session->set('equipe', $equipe);
+            return $this->render('equipe/index.html.twig');
         }
-        $managers = $session->get('manager');
-        $joueurs = $session->get('joueur');
-        foreach($managers as $manager) {
-            $equipe->addManager($manager);
-        }   
-        foreach($joueurs as $joueur) {
-            $equipe->addJoueur($joueur);
-        }   
+    }
 
+    
+    //route pour enregistrer l'equipe
+    #[Route('/createEquipe', name: 'app_create')]
+    public function createEquipe(Request $request, EquipeRepository $equipeRepository, ManagerRepository $managerRepository, EntityManagerInterface $entityManager, SessionInterface $session):Response
+    {
+        $equipe = new Equipe();
         $form = $this->createForm(EquipeFormType::class, $equipe);
         $form->handleRequest($request);
-
         if($form->isSubmitted() && $form->isValid()) {
             $equipe = $form->getData();
-            if(count($equipe->getJoueurs()) > 15 && count($equipe->getManagers()) > 4) {
-                $equipe->setBudget();
-                $equipe->setRenommee();
-                $entityManager->persist($equipe);
-                $entityManager->flush();
-                // L'équipe est enregistrée avec succès, je la supprime de la session
-                $session->remove('equipe');
-                return $this->render('equipe/message.html.twig', [
-                    'message' => 'equipe créée',
-                ]);
-            } else {
-                // L'équipe n'est pas encore complète, je l'enregistre dans la session
-                $session->set('equipe', $equipe);
-            }
+            $entityManager->persist($equipe);
+            $entityManager->flush();
+            $session->set('equipe', $equipe);
+            return $this->render('equipe/manager_form.html.twig', [
+                'managers' => $managerRepository->findAll(),
+            ]);
         }
-
         return $this->render('equipe/form_equipe.html.twig', [
             'form' => $form->createView(),
         ]);
 
+
     }
-    
+
+    //route pour créer le staff manager
     #[Route('/createEquipe/manager', name: 'manager_create')]
 
     public function addManagerEquipe(Request $request, ManagerRepository $managerRepository, JoueurRepository $joueurRepository, EntityManagerInterface $entityManager, SessionInterface $session):Response
     {
         $session = $request->getSession();
-        if($request->isXmlHttpRequest()) {
-            $managersId = $request->request->all("managers");
+        $myequipe = $session->get('equipe');
+        $equipeId = $myequipe->getId();
+        $equipe = $entityManager
+                ->getRepository(Equipe::class)
+                ->find($equipeId);
+        if($request->getMethod() == 'POST') {
+            $managersId = $request->request->all("manager");
+            dump($managersId);
             $managers = $entityManager
-            ->getRepository(Manager::class)
-            ->findBy(['id' => $managersId]);
-            $session->set('manager', $managers);
+                ->getRepository(Manager::class)
+                ->findBy(['id' => $managersId]);
+            if (isset($managers)) {
+                foreach($managers as $manager) {
+                    $equipe->addManager($manager);
+                    $equipe->setBudget();
+                    $entityManager->persist($equipe);
+                    $entityManager->flush();
+                }
+                return $this->render('equipe/joueur_form.html.twig', [
+                    'joueurs' => $joueurRepository->findAll(),
+                ]);   
+            }
         }
-
-        if(isset($managers) && (count($managers) === 5)) {
-            return $this->render('equipe/joueur_form.html.twig', [
-                'joueurs' => $joueurRepository->findAll(),
-
-            ]);
-        }
-
         return $this->render('equipe/manager_form.html.twig', [
             'managers' => $managerRepository->findAll(),
         ]);
     }
 
+    //route pour créer le staff joueur
     #[Route('/createEquipe/joueur', name: 'joueur_create')]
 
     public function addJoueurEquipe(Request $request, JoueurRepository $joueurRepository, SessionInterface $session, EntityManagerInterface $entityManager)
     {
         $session = $request->getSession();
-        if($request->isXmlHttpRequest()) {
-            $joueursId = $request->request->all('joueurs');
+        $myequipe = $session->get('equipe');
+        $equipeId = $myequipe->getId();
+        $equipe = $entityManager
+                ->getRepository(Equipe::class)
+                ->find($equipeId);
+        if($request->getMethod() == 'POST') {
+            $joueursId = $request->request->all('joueur');
             $joueurs = $entityManager
                     ->getRepository(Joueur::class)
                     ->findBy(['id' => $joueursId]);
-            $session->set('joueur', $joueurs);
-        }
-
-        if(isset($joueurs) && (count($joueurs) === 22)) {
-            return $this->render('equipe/joueur_form.html.twig', [
-                'joueurs' => $joueurRepository->findAll(),
-
-            ]);
-        }    
-        
+            if(isset($joueurs)) {
+                foreach($joueurs as $joueur) {
+                    $equipe->addJoueur($joueur);
+                    $equipe->setBudget();
+                    $equipe->setRenommee();
+                    $entityManager->persist($equipe);
+                    $entityManager->flush();
+                }
+                return $this->redirectToRoute('app_set');   
+            }
+        }  
         return $this->render('equipe/joueur_form.html.twig', [
             'joueurs' => $joueurRepository->findAll(),
         ]);
     }
 
+    //route pour afficher le menu de sélection d'une equipe
     #[Route('/equipe', name: 'app_equipe')]
     public function allEquipe(Request $request, EquipeRepository $equipeRepository): Response
     {
@@ -148,6 +177,7 @@ class EquipeController extends AbstractController
         ]);
     }
     
+    //route pour reload les equipes dans la base de données
     #[Route('/equipereload', name: 'app_equipe_new')]
     public function newEquipe(EntityManagerInterface $entityManager, EquipeFixture $equipeFixture, EquipeRepository $equipeRepository): Response
     {
