@@ -14,9 +14,40 @@
 
 
 
+{% endblock %}
 {% block javascripts %}
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe" crossorigin="anonymous"></script>
-{% endblock %}
+<script>
+        //fonction pour exclure du tableau la checkbox que l'on désélectionne 
+        Array.prototype.pull = function (item) {
+            let index = this.indexOf(item);
+            if (index > -1) {
+            this.splice(index, 1);
+                return index;
+            } else {
+                return -1;
+            }
+        };
+        //recupération des données du dom
+        const accueil = document.getElementById("accueil");
+        const equipetab = document.getElementById("equipe_tab");
+        const managerform = document.getElementById("manager_tab");
+        const joueurform = document.getElementById("joueur_tab");
+
+        accueil.addEventListener("click", function() {
+            window.location.href = "/symfoot"
+        })
+        equipetab.addEventListener("click", function() {
+            window.location.href = "/createEquipe";
+        })
+        managerform.addEventListener("click", function() {
+            window.location.href = "/manager";
+        })
+        joueurform.addEventListener("click", function() {
+            window.location.href = "/joueur";
+        })
+        
+</script>
 {% endblock %}
 </body>
 </html>

@@ -1,0 +1,108 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Joueurs{% endblock %}
+ 
+{% block body %}
+<div class="d-flex align-items-start">
+  <div class="nav flex-column nav-pills me-3" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+    <button class="nav-link" id="equipe_tab" data-bs-toggle="pill" type="button" role="tab" aria-controls="v-pills-equipe" aria-selected="false">Equipe</button>
+    <button class="nav-link" id="manager_tab" data-bs-toggle="pill" type="button" role="tab" aria-controls="v-pills-manager" aria-selected="false">Manager</button>
+    <button class="nav-link active" id="joueur_tab" data-bs-toggle="pill" type="button" role="tab" aria-controls="v-pills-joueur" aria-selected="true">Joueur</button>
+    <button class="nav-link" data-bs-toggle="pill" type="button" id="accueil" role="tab" aria-controls="v-pills-joueur" aria-selected="false">Accueil</button>
+</div>
+<div class="wrapper">
+    <h1>JOUEURS</h1><br>
+    <form id="form2" method="post">
+        <h2 id="stafjoueur" style="color:red">Il reste <span id="nbjoueur">22</span> joueurs à recruter</h2>
+        <table class="table table-striped table-hover table-bordered">
+            <thead class="table-dark">
+            <tr>
+                <th scope="col">NOM</th>
+                <th scope="col">PRENOM</th>
+                <th scope="col">POSITION</th>
+                <th scope="col">VITESSE</th>
+                <th scope="col">DRIBBLE</th>
+                <th scope="col">TIR</th>
+                <th scope="col">RENOMMEE</th>
+                <th scope="col">SALAIRE</th>
+                <th scope="col">ARRET</th>
+                <th scope="col">SELECT</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for joueur in joueurs %}
+                <tr>
+                <!-- si le joueur n'est pas dans une equipe on affiche la checkbox -->
+                {% if joueur.getJoueurEquipe() is null %}
+                    <td>{{ joueur.nom|upper }}</td>
+                    <td>{{ joueur.prenom|upper }}</td>
+                    <td>{{ joueur.position|upper }}</td>
+                    <td>{{ joueur.vitesse|upper }}</td>
+                    <td>{{ joueur.dribble|upper }}</td>
+                    <td>{{ joueur.tir|upper }}</td>
+                    <td>{{ joueur.renommee|upper }}</td>
+                    <td>{{ joueur.salaire|upper }}</td>
+                    <td>{{ joueur.arret|upper }}</td>
+                    <td><input class="joueurcheck" name="joueur"type="checkbox" value="{{ joueur.id }}"></td>
+                {% endif %}
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        <button id='btn_joueurs' class="" type="submit" style="display:none">Recruter joueur</button>
+    </form>
+</div>
+<script>
+    const joueurs = document.getElementsByClassName("joueurcheck");
+    const nbjoueur = document.getElementById("nbjoueur");
+    const stafjoueur = document.getElementById("stafjoueur");
+    const btnjoueurs = document.getElementById("btn_joueurs");
+    //création de tableau vide pour ajouter les joueurs sélectionnés
+    let equipeJoueurs = [];
+        
+    //boucles sur les checkbox pour vérifier celles checkés et ajouter dans le tableau correspondant l'id du joueur attribuée comme valeur à l'input
+    let countJ = 22;
+    for(let i = 0; i < joueurs.length; i++) {
+        joueurs[i].addEventListener("change", function(){
+            if(this.checked) {
+                equipeJoueurs.push(this.value);
+                countJ--
+            } else {
+                equipeJoueurs.pull(this.value);
+                countJ++
+            }
+            nbjoueur.innerHTML = countJ;
+            if(equipeJoueurs.length > 21) {
+                stafjoueur.innerHTML = 'equipe de joueur complète';
+                stafjoueur.style.color = 'limegreen';
+                btnjoueurs.style.display = "block";
+                joueurs[i].style.display = "none";
+                postjoueur();
+            } else {
+                joueurs[i].style.display = "inline";
+                btnjoueurs.style.display = "none";
+                stafjoueur.style.color = 'red';
+            }
+        });
+    };     
+
+    //requète ajax pour envoyer les données des tableaux managers et joueurs au controller 
+    function postjoueur() {
+            //requète ajax pour envoyer les données du tableau manager au controller 
+            $.ajax({
+                type: 'POST',
+                url: "/createEquipe/joueur",
+                data: {
+                    'joueurs': equipeJoueurs
+                },
+                success: function(response) {
+                    console.log("Les équipes ont été créé avec succès !");
+                },
+                error: function(error) {
+                    console.error("Erreur lors de la création de l'équipe :", error);
+                }
+            });
+        }
+        btn_joueurs.addEventListener("click", postjoueur());
+</script>
+{% endblock %}

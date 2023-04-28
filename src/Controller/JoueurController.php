@@ -15,7 +15,7 @@ class JoueurController extends AbstractController
     #[Route('/joueur', name: 'app_joueur')]
     public function AllJoueurs(Request $request, JoueurRepository $joueurRepository): Response
     {
-        return $this->render('joueur/index.html.twig', [
+        return $this->render('equipe/joueur_form.html.twig', [
             'controller_name' => 'JoueurController',
             'joueurs' => $joueurRepository->findAll(),
         ]);

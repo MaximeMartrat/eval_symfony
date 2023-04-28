@@ -16,7 +16,7 @@ class ManagerController extends AbstractController
     #[Route('/manager', name: 'app_manager')]
     public function allManagers(Request $request, ManagerRepository $managerRepository): Response
     {
-        return $this->render('manager/index.html.twig', [
+        return $this->render('equipe/manager_form.html.twig', [
             'controller_name' => 'ManagerController',
             'managers' => $managerRepository->findAll(),
         ]);
